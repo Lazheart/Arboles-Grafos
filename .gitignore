@@ -1,0 +1,10 @@
+# Binaries and object files
+arboles_grafos
+*.o
+*.a
+*.so
+*.out
+
+# AddressSanitizer and temporary debug files
+*_asan
+
