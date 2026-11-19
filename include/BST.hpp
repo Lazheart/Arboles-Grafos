@@ -303,6 +303,122 @@ public:
         return height;
     }
 
+    // Problema 3: busca un camino desde la raiz hasta una hoja.
+    // La cima de camino contiene la hoja si se encuentra la suma.
+    bool findPathSum(const T& k, std::stack<T>& camino) const {
+        while (!camino.empty()) {
+            camino.pop();
+        }
+        if (root == nullptr) return false;
+
+        std::stack<Node*> pendientes;
+        std::stack<size_t> profundidades;
+        pendientes.push(root);
+        profundidades.push(0);
+        T suma = T();
+
+        while (!pendientes.empty()) {
+            Node* actual = pendientes.top();
+            pendientes.pop();
+            size_t profundidad = profundidades.top();
+            profundidades.pop();
+
+            // Al cambiar de rama quitamos los nodos del camino anterior.
+            while (camino.size() > profundidad) {
+                suma -= camino.top();
+                camino.pop();
+            }
+            camino.push(actual->key);
+            suma += actual->key;
+
+            if (actual->left == nullptr && actual->right == nullptr && suma == k) {
+                return true;
+            }
+
+            // El derecho entra primero para visitar primero el izquierdo.
+            if (actual->right != nullptr) {
+                pendientes.push(actual->right);
+                profundidades.push(profundidad + 1);
+            }
+            if (actual->left != nullptr) {
+                pendientes.push(actual->left);
+                profundidades.push(profundidad + 1);
+            }
+        }
+
+        while (!camino.empty()) {
+            camino.pop();
+        }
+        return false;
+    }
+
+    // Problema 4: despues del primer espacio vacio no debe haber mas nodos.
+    bool isComplete() const {
+        std::queue<Node*> cola;
+        cola.push(root);
+        bool hayEspacio = false;
+
+        while (!cola.empty()) {
+            Node* actual = cola.front();
+            cola.pop();
+
+            if (actual == nullptr) {
+                hayEspacio = true;
+            } else {
+                if (hayEspacio) return false;
+                cola.push(actual->left);
+                cola.push(actual->right);
+            }
+        }
+        return true;
+    }
+
+    // El ancho es la cantidad de nodos reales de un nivel.
+    size_t getMaxWidth() const {
+        if (root == nullptr) return 0;
+
+        std::queue<Node*> cola;
+        cola.push(root);
+        size_t anchoMaximo = 0;
+
+        while (!cola.empty()) {
+            size_t cantidad = cola.size();
+            if (cantidad > anchoMaximo) anchoMaximo = cantidad;
+
+            for (size_t i = 0; i < cantidad; i++) {
+                Node* actual = cola.front();
+                cola.pop();
+                if (actual->left != nullptr) cola.push(actual->left);
+                if (actual->right != nullptr) cola.push(actual->right);
+            }
+        }
+        return anchoMaximo;
+    }
+
+    // Profundidad en aristas: raiz = 0. Un arbol vacio devuelve -1.
+    int getMinDepth() const {
+        if (root == nullptr) return -1;
+
+        std::queue<Node*> cola;
+        cola.push(root);
+        int profundidad = 0;
+
+        while (!cola.empty()) {
+            size_t cantidad = cola.size();
+            for (size_t i = 0; i < cantidad; i++) {
+                Node* actual = cola.front();
+                cola.pop();
+                if (actual->left == nullptr && actual->right == nullptr) {
+                    return profundidad;
+                }
+                if (actual->left != nullptr) cola.push(actual->left);
+                if (actual->right != nullptr) cola.push(actual->right);
+            }
+            profundidad++;
+        }
+        return -1;
+    }
+
     /**
      * @brief Cantidad de nodos almacenados.
      */

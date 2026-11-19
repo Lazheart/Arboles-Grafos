@@ -160,6 +160,65 @@ int main() {
     printSubSeparator("Estructura visual del Red-Black Tree (20 elementos ordenados)");
     rbtAsc.printTree();
 
+    printSeparator("PROBLEMA 3: DFS ITERATIVO");
+
+    BST<int> arbolRecorridos;
+    int datosRecorridos[] = {10, 5, 15, 3, 7, 12, 18};
+    std::cout << "Datos insertados: ";
+    for (int valor : datosRecorridos) {
+        arbolRecorridos.insert(valor);
+        std::cout << valor << " ";
+    }
+    std::cout << "\n";
+
+    int sumas[] = {18, 37, 15, 100};
+    std::stack<int> camino;
+    for (int k : sumas) {
+        std::cout << "K = " << k << ": ";
+        if (arbolRecorridos.findPathSum(k, camino)) {
+            // Invertimos la pila para imprimir desde la raiz hasta la hoja.
+            std::stack<int> orden;
+            while (!camino.empty()) {
+                orden.push(camino.top());
+                camino.pop();
+            }
+            while (!orden.empty()) {
+                std::cout << orden.top() << " ";
+                orden.pop();
+            }
+            std::cout << "\n";
+        } else {
+            std::cout << "No existe un camino raiz-hoja con esa suma.\n";
+        }
+    }
+
+    printSeparator("PROBLEMA 4: BFS ITERATIVO");
+    std::cout << "Profundidad en aristas: raiz = 0, arbol vacio = -1.\n";
+    std::cout << "Arbol con los 7 datos del problema 3:\n";
+    std::cout << "Completo: " << (arbolRecorridos.isComplete() ? "Si" : "No") << "\n";
+    std::cout << "Ancho maximo: " << arbolRecorridos.getMaxWidth() << "\n";
+    std::cout << "Profundidad minima: " << arbolRecorridos.getMinDepth() << "\n";
+
+    arbolRecorridos.remove(12);
+    std::cout << "\nDespues de eliminar 12 (queda un espacio antes de 18):\n";
+    std::cout << "Completo: " << (arbolRecorridos.isComplete() ? "Si" : "No") << "\n";
+    std::cout << "Ancho maximo: " << arbolRecorridos.getMaxWidth() << "\n";
+    std::cout << "Profundidad minima: " << arbolRecorridos.getMinDepth() << "\n";
+
+    BST<int> arbolDesigual;
+    int datosDesiguales[] = {10, 5, 15, 3, 2};
+    for (int valor : datosDesiguales) arbolDesigual.insert(valor);
+    std::cout << "\nArbol con datos 10 5 15 3 2 (hojas a distinta profundidad):\n";
+    std::cout << "Completo: " << (arbolDesigual.isComplete() ? "Si" : "No") << "\n";
+    std::cout << "Ancho maximo: " << arbolDesigual.getMaxWidth() << "\n";
+    std::cout << "Profundidad minima: " << arbolDesigual.getMinDepth() << "\n";
+
+    BST<int> arbolVacio;
+    std::cout << "\nArbol vacio:\n";
+    std::cout << "Completo: " << (arbolVacio.isComplete() ? "Si" : "No") << "\n";
+    std::cout << "Ancho maximo: " << arbolVacio.getMaxWidth() << "\n";
+    std::cout << "Profundidad minima: " << arbolVacio.getMinDepth() << "\n";
+
     printSeparator("FIN DE LA EJECUCIÓN");
     return 0;
 }

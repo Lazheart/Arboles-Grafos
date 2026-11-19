@@ -280,9 +280,52 @@ Inserción de 20 elementos en orden estrictamente ascendente:
 
 Usando exclusivamente `std::stack` (sin recursión):
 
-- [ ] Determinar si existe un camino raíz-hoja cuya suma sea igual a K.
-- [ ] Devolver dicho camino.
-- [ ] Explicar por qué DFS es adecuado para este problema.
+- [x] Determinar si existe un camino raíz-hoja cuya suma sea igual a K.
+- [x] Devolver dicho camino.
+- [x] Explicar por qué DFS es adecuado para este problema.
+
+### Solución
+
+Se agregó `BST::findPathSum(k, camino)`. Devuelve `true` si encuentra el
+camino y guarda sus valores en una `std::stack`. La raíz queda al fondo y la
+hoja en la cima. Si no encuentra un camino, devuelve `false` y deja la pila
+vacía. También limpia cualquier resultado anterior antes de empezar.
+
+Se usan dos pilas para los nodos pendientes y sus profundidades. Otra pila,
+`camino`, guarda la rama que estamos revisando. Antes de visitar un nodo de
+profundidad `d`, quitamos valores hasta que queden sus `d` antecesores y
+restamos esos valores de la suma. Después agregamos el nodo actual.
+Apilamos primero el hijo derecho y luego el izquierdo para recorrer primero
+la rama izquierda.
+
+Solo se acepta la suma cuando el nodo es una hoja, es decir, cuando no tiene
+ningún hijo. No se descarta una rama por superar K, porque puede haber
+valores negativos más adelante.
+
+### ¿Por qué DFS?
+
+DFS permite seguir una rama hasta una hoja y luego regresar para probar la
+siguiente. En cada visita, `camino` contiene exactamente los nodos desde la
+raíz hasta el nodo actual y `suma` es la suma de esos valores. Al cambiar de
+rama se quitan los nodos que ya no pertenecen al camino. Por eso, al llegar
+a una hoja, comparar `suma` con K comprueba un camino raíz-hoja completo.
+Como cada nodo se apila y se visita una sola vez, se revisan todas las hojas
+si no se encuentra antes una solución.
+
+El tiempo es O(n): cada nodo entra y sale de las pilas como máximo una vez.
+El espacio adicional es O(h), donde h es la altura, porque se guarda el
+camino actual y como máximo una rama pendiente por cada profundidad.
+
+### Ejemplos en `main`
+
+Se insertan `10, 5, 15, 3, 7, 12, 18`.
+
+| K | Resultado |
+| :--- | :--- |
+| 18 | Camino `10 5 3` |
+| 37 | Camino `10 15 12` |
+| 15 | No existe: `10 5` suma 15, pero 5 no es una hoja |
+| 100 | No existe |
 
 ---
 
@@ -290,10 +333,65 @@ Usando exclusivamente `std::stack` (sin recursión):
 
 Usando exclusivamente `std::queue` (sin recursión):
 
-- [ ] Determinar si un árbol es completo.
-- [ ] Calcular el ancho máximo del árbol.
-- [ ] Determinar la profundidad mínima.
-- [ ] Justificar formalmente por qué BFS es el enfoque natural para estas métricas.
+- [x] Determinar si un árbol es completo.
+- [x] Calcular el ancho máximo del árbol.
+- [x] Determinar la profundidad mínima.
+- [x] Justificar formalmente por qué BFS es el enfoque natural para estas métricas.
+
+### Solución
+
+Se agregaron tres métodos al BST, todos iterativos y usando `std::queue`:
+
+- `isComplete()`: recorre los nodos por niveles, incluyendo sus hijos nulos.
+  Desde el primer espacio vacío, si aparece otro nodo real devuelve `false`.
+  Si termina sin encontrar ese caso devuelve `true`.
+- `getMaxWidth()`: antes de procesar cada nivel guarda el tamaño de la cola.
+  Compara esa cantidad con el máximo y procesa exactamente esa cantidad de
+  nodos, agregando sus hijos para el siguiente nivel. Cuenta solo nodos reales.
+- `getMinDepth()`: recorre por niveles y devuelve la profundidad de la primera
+  hoja encontrada. Un nodo con un solo hijo todavía no es una hoja.
+
+La profundidad se mide en aristas: la raíz tiene profundidad 0. Para el árbol
+vacío usamos -1, porque no existe ninguna hoja; su ancho es 0 y se considera
+completo. Un árbol con solo la raíz tiene ancho 1 y profundidad mínima 0.
+Esta profundidad es distinta de `getHeight()`, que en el ejercicio 1 cuenta
+niveles.
+
+### Justificación de BFS
+
+Sea L_d el conjunto de nodos a profundidad d. Al comenzar el recorrido, la
+cola contiene solo L_0, que es la raíz. Si al empezar una vuelta contiene
+L_d y procesamos exactamente esos nodos, los únicos nodos que agregamos son
+sus hijos. Estos forman L_(d+1), en orden de izquierda a derecha porque se
+agrega primero cada hijo izquierdo. Por inducción, cada vuelta procesa un
+nivel completo antes de pasar al siguiente.
+
+Esto permite justificar las tres respuestas:
+
+- **Completitud:** en un árbol completo todos los niveles anteriores al
+  último están llenos y el último se ocupa de izquierda a derecha. Al revisar
+  también los espacios nulos, un nodo real después del primer espacio vacío
+  contradice esa condición. Si no ocurre, no hay huecos antes de ningún nodo
+  y el árbol es completo.
+- **Ancho máximo:** al comienzo de cada vuelta la cola tiene exactamente
+  |L_d| nodos. El mayor de esos tamaños es, por definición, el ancho máximo.
+- **Profundidad mínima:** BFS visita profundidades en orden 0, 1, 2, ...
+  Si la primera hoja está a profundidad d, ya se revisaron todos los niveles
+  menores sin encontrar hojas. Por tanto, ninguna hoja puede estar más cerca
+  de la raíz.
+
+Cada método tarda O(n) en el peor caso y utiliza O(w) espacio adicional,
+donde w es el ancho máximo. En completitud también se encolan espacios
+nulos, pero cada nodo real agrega solo dos hijos, así que las cotas se mantienen.
+
+### Ejemplos en `main`
+
+| Árbol | ¿Completo? | Ancho máximo | Profundidad mínima (aristas) |
+| :--- | :---: | :---: | :---: |
+| `10, 5, 15, 3, 7, 12, 18` | Sí | 4 | 2 |
+| El mismo árbol después de eliminar 12 | No | 3 | 2 |
+| `10, 5, 15, 3, 2` | No | 2 | 1 |
+| Vacío | Sí | 0 | -1 |
 
 ---
 
